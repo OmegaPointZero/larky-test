@@ -1,0 +1,91 @@
+<html>
+
+<head>
+    <title>Node-Express-Mongo boilerplate</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> <!-- add JQuery -->
+    <script>
+      $(document).ready(function() {
+          $("#sendAlias").click(function(){
+              var alias = $('#alias').val()
+              var obj = {
+                ccnum: alias
+              }
+              var url = 'https://<%=vault%>.sandbox.verygoodproxy.com/request'
+              $.ajax({
+                type: "POST",
+                url: url,
+                contentType: "application/json",
+                data: JSON.stringify(obj),
+                success: function(d){
+                  console.log('Got data back')
+                  console.log(d)
+                  $('#results').text(JSON.stringify(d));
+                },
+                failure: function(e){
+                  console.log(e)
+                }
+              });
+          }); 
+      });
+    </script>
+</head>
+
+<body>
+    <h1>Welcome!</h1>
+    
+    <h3>Today we are going to learn about Larky.</h3>
+    <div>
+      This server is running this default endpoint, and an endpoint at /request you can post data to. Your mission is to enter an alias in the form below and get a successful transaction message. 
+    </div>
+    <div>
+      Here is the payload the below form will send to your VGS Inbound Vault:<br>
+        { "ccnum" : tok_sandbox_mxSPAvRWgYpeaaHp5tAE4x } <br>
+      You will need to use larky to do the following in order to create the proper payload:<br>
+      1. Reveal the alias back into the card number. <br>
+      2. Generate a random 12 byte nonce for an AES GCM Encryption Operation.<br>
+      3. Generate a random 32 byte key for an AES GCM Encrytption Operation.<br>
+      4. Generate a ciphertext of the revealed alias value with the key and the nonce. (hint:encrypt) <br>
+      5. Generate the tag (hint: digest)<br>
+      6. Insert all of this in the payload like so: <br>
+        { ccnum: &lt;revealed card number&gt;, encrypted:&lt;ciphertext&gt;, iv:&lt;12 byte nonce&gt;, key:&lt;32 byte key&gt;, tag:<tag> }<br><br>
+    </div>
+    <div>For Example:
+    </div>
+    <div>
+{
+  ccnum: '4111111111111111',
+  encrypted: [
+    145, 194, 149, 206,  24,
+    181, 198, 193,  16, 231,
+     40,  33, 216,  76,  62,
+    175
+  ],
+  iv: [
+    146, 114, 226, 60, 191,
+    226, 103,  65, 47,  12,
+     87, 149
+  ],
+  key: [
+    87, 117,  98,  98, 97, 108, 117, 98,
+    98,  97, 100, 117, 98, 100, 117, 98,
+    87, 117,  98,  98, 97, 108, 117, 98,
+    98,  97, 100, 117, 98, 100, 117, 98
+  ],
+  tag: [
+    109, 194, 130,  57, 199,
+    239, 244,  63, 201,  81,
+    242,  50,  63,  62, 123,
+    151
+  ]
+}
+    </div>
+    <hr>
+    <div>
+      <Label>Aliased Card Number</Label>: <input type="text" id="alias" name="alias" /> <button id="sendAlias">Submit</button>
+    </div>
+    <h4>Results:</h4>
+    <div id="results">
+    </div>
+</body>
+</html>
